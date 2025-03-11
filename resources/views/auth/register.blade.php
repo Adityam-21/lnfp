@@ -456,10 +456,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Register</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
+                        <a class="nav-link" href="{{ route('admin.adminlogin') }}">Admin Login</a>
                     </li>
                 </ul>
             </div>
@@ -488,12 +485,18 @@
         <label for="name" class="form-label">Full Name</label>
         <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name"
             required>
+        @error('name')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
     </div>
 
     <div class="form-group">
         <label for="email" class="form-label">Email Address</label>
         <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email"
             required>
+            @error('email')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
         <small class="form-text">We'll never share your email with anyone else.</small>
     </div>
 
@@ -501,6 +504,9 @@
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" placeholder="Create a password"
             required>
+            @error('password')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
     </div>
 
     <div class="form-group">
