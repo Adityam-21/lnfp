@@ -9,9 +9,9 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if(auth()->check() && auth()->user()->is_admin == 1){
+        if(auth()->guard('admin')->check()){
             return $next($request);
         }
-        return redirect('/dashboard')->with('error', 'You do not have admin access');
+        return redirect()->route('admin.adminlogin')->with('error', 'You do not have admin access');
     }
 }

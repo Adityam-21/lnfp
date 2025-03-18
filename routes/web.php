@@ -24,10 +24,12 @@ Route::prefix('admin')->group(function () {
     Route::get('/adminlogin', [AuthController::class, 'adminlogin'])->name('admin.adminlogin');
     Route::post('/adminlogin', [AuthController::class, 'adminloginPost'])->name('admin.adminlogin.post');
 
-    
     Route::middleware(['auth:admin'])->group(function () {
-        Route::get('/welcome', [AuthController::class, 'welcome'])->name('admin.welcome');
+        Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/users/{id}', [AuthController::class, 'showUser'])->name('admin.user.show');
+        Route::get('/user/{id}/edit', [AuthController::class, 'editUser'])->name('admin.user.edit');
+        Route::put('/user/{id}', [AuthController::class, 'updateUser'])->name('admin.user.update');
+        Route::delete('/user/{id}', [AuthController::class, 'deleteUser'])->name('admin.user.delete');
         Route::post('/logout', [AuthController::class, 'adminLogout'])->name('admin.logout');
     });
 });

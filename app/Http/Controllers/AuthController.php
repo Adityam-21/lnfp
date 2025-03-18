@@ -117,10 +117,9 @@ class AuthController extends Controller
             $credentials = ['email' => $request->email, 'password' => $request->password];
 
             if (Auth::guard('admin')->attempt($credentials)) {
-                return redirect()->route('admin.welcome');
+                return redirect()->route('admin.dashboard');
             }
             
-            // Authentication failed
             return redirect()->route('admin.adminlogin')
                 ->withInput($request->except('password'))
                 ->withErrors(['email' => 'These credentials do not match our records.']);
@@ -131,17 +130,32 @@ class AuthController extends Controller
         }
     }
     
-    public function welcome()
+    public function dashboard()
     {
-        // Fetch all users for display
         $users = User::all();
-        return view('welcome', compact('users'));
+        return view('admin.dashboard', compact('users'));
     }
     
-    public function showUser($id)
+    public function editUser($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.user-detail', compact('user'));
+        return view('admin.edit-user', compact('user'));
+    }
+    
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+        return redirect()->route('admin.dashboard')->with('success', 'User updated successfully.');
+    }
+    
+    public function deleteUser($id)
+    {
+        User::findOrFail($id)->delete();
+        return redirect()->route('admin.dashboard')->with('success', 'User deleted successfully.');
     }
     
     public function adminlogout(Request $request)
