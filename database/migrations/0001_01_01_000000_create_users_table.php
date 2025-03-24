@@ -14,8 +14,9 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->enum('role', ['customer', 'Admin'])->default('customer'); // Correct syntax
+            $table->enum('role', ['customer', 'Admin'])->default('customer');
             $table->timestamps();
+            $table->softDeletes(); // Moved softDeletes inside the main 'users' table creation
         });
     }
 

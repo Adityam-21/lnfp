@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -21,7 +22,9 @@
                 </ul>
                 <form method="POST" action="{{ route('admin.logout') }}" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-danger">Logout</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='{{ route('admin.adminlogin') }}'">
+                        Logout
+                    </button>
                 </form>
             </div>
         </div>
@@ -29,6 +32,16 @@
 
     <div class="container mt-4">
         <h2 class="mb-4">User Management</h2>
+        
+        <div class="mb-3">
+            <a href="{{ route('users.export') }}" class="btn btn-success">Export Users</a>
+            <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="d-inline">
+                @csrf
+                <input type="file" name="file" required>
+                <button type="submit" class="btn btn-primary">Import Users</button>
+            </form>
+        </div>
+
         <table class="table table-bordered">
             <thead class="table-dark">
                 <tr>
@@ -46,10 +59,10 @@
                         <td>{{ $user->email }}</td>
                         <td>
                             <a href="{{ route('admin.user.edit', $user->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('admin.user.delete', $user->id) }}" method="POST" class="d-inline">
+                            <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $user->id }})">Delete</button>
+                            <form id="delete-form-{{ $user->id }}" action="{{ route('admin.user.softdelete', $user->id) }}" method="POST" style="display: none;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -57,5 +70,23 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        function confirmDelete(userId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "The user will be soft deleted and can be restored later!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + userId).submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
