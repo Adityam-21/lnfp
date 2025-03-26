@@ -5,20 +5,23 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Exports\UsersExport;
+use App\Exports\FilteredUsersExport; // ✅ Correctly imported
 use App\Imports\UsersImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
-    public function export() {
+    public function export()
+    {
         return Excel::download(new UsersExport, 'users.xlsx');
     }
 
-    public function import(Request $request) {
+    public function import(Request $request)
+    {
         $request->validate([
             'file' => 'required|mimes:xlsx,csv'
         ]);
-        
+
         Excel::import(new UsersImport, $request->file('file'));
 
         return back()->with('success', 'Users imported successfully.');
@@ -33,7 +36,7 @@ class UserController extends Controller
     public function editUser($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.user.edit', compact('user'));
+        return view('admin.user.edit-user', compact('user'));
     }
 
     public function updateUser(Request $request, $id)
@@ -52,12 +55,21 @@ class UserController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'User permanently deleted.');
     }
 
-    // ✅ Soft Delete Function
     public function softDelete($id)
     {
         $user = User::findOrFail($id);
-        $user->delete(); // Soft delete (moves user to "trashed" state)
-        
+        $user->delete();
+
         return redirect()->route('admin.dashboard')->with('success', 'User soft deleted successfully.');
+    }
+
+    public function exportFiltered(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        return Excel::download(new FilteredUsersExport($request->start_date, $request->end_date), 'filtered_users.xlsx');
     }
 }

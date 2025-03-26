@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
 
 class AuthController extends Controller
 {
@@ -55,29 +57,22 @@ class AuthController extends Controller
     
     public function registerPost(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            "name" => "required|string|max:255|regex:/^[a-zA-Z\s]+$/",
-            "email" => "required|email|unique:users,email",
-            "password" => "required|min:6|confirmed",
-        ], [
-            "name.regex" => "The name may only contain letters and spaces.",
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
         ]);
-        
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-        
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => bcrypt($request->password),
         ]);
-        
-        if ($user) {
-            return redirect()->route("login")->with("success", "Registration successful! Please login.");
-        }
-        
-        return back()->with("error", "Registration failed. Please try again.");
+
+        // Send Welcome Email
+        Mail::to($user->email)->send(new WelcomeMail($user));
+
+        return redirect()->route('login')->with('success', 'Registration successful! Check your email.');
     }
     
     public function logout(Request $request)

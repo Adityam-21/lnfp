@@ -42,6 +42,16 @@
             </form>
         </div>
 
+        <!-- Export Users Based on Date Range -->
+        <div class="mb-3">
+            <h4>Export Users Based on Date Range</h4>
+            <form action="{{ route('users.export.filtered') }}" method="GET" class="d-flex gap-2">
+                <input type="date" name="start_date" class="form-control" required>
+                <input type="date" name="end_date" class="form-control" required>
+                <button type="submit" class="btn btn-success">Export Filtered Users</button>
+            </form>
+        </div>
+
         <table class="table table-bordered">
             <thead class="table-dark">
                 <tr>
@@ -58,7 +68,7 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            <a href="{{ route('admin.user.edit', $user->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="{{ route('admin.user.edit-user', $user->id) }}" class="btn btn-warning btn-sm">Edit</a>
                             <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $user->id }})">Delete</button>
                             <form id="delete-form-{{ $user->id }}" action="{{ route('admin.user.softdelete', $user->id) }}" method="POST" style="display: none;">
                                 @csrf
