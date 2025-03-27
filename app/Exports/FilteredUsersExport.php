@@ -18,13 +18,17 @@ class FilteredUsersExport implements FromCollection, WithHeadings, WithMapping
         $this->startDate = $startDate;
         $this->endDate = $endDate;
     }
-
     public function collection()
-    {
-        return User::whereBetween('created_at', [$this->startDate, $this->endDate])
-            ->select('id', 'name', 'email', 'created_at')
-            ->get();
-    }
+{
+    return User::whereBetween('created_at', [$this->startDate, $this->endDate])
+        ->select('id', 'name', 'email', 'created_at')
+        ->get()
+        ->map(function ($user) {
+            $user->password = bcrypt('defaultPassword'); // Assign a default password
+            return $user;
+        });
+}
+
 
     public function headings(): array
     {
