@@ -448,6 +448,25 @@
         </style>
     </head>
 
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+    
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+        <style>
+            .invalid-feedback {
+                display: block;
+                color: red;
+                font-size: 0.875em;
+            }
+        </style>
+    </head>
     <body>
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid">
@@ -464,62 +483,99 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('admin.adminlogin') }}">Admin Login</a>
                         </li>
-                        
                     </ul>
                 </div>
             </div>
         </nav>
-
-        <div class="container">
-            <div class="login-card">
+    
+        <div class="container mt-5">
+            <div class="login-card card">
                 <div class="card-header">
                     <h2>Welcome Back</h2>
                     <p>Sign in to your account to continue</p>
                 </div>
-
-                @if (session()->has('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
+    
+                <div id="alert-message"></div> <!-- Dynamic Alert Message -->
+    
                 <div class="card-body">
-                    <form method="POST" action="{{ route('login.post') }}">
+                    <form id="loginForm">
                         @csrf
                         <div class="form-group">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" name="email"
-                                class="form-control"@error('email')is-invalid @enderror placeholder="Enter your email"
-                                required>
-                            @error('email')
-                                <p class="invalid-feedback">{{ $message }}</p>
-                            @enderror
+                            <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            <p id="email-error" class="invalid-feedback"></p>
                         </div>
-
+    
                         <div class="form-group">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-control" @error('password') is-invalid @enderror
-                                placeholder="Enter your password" required>
-                            @error('password')
-                                <p class="invalid-feedback">{{ $message }}</p>
-                            @enderror
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                            <p id="password-error" class="invalid-feedback"></p>
                         </div>
-
+    
                         <div class="form-check">
                             <input type="checkbox" id="remember" name="remember" class="form-check-input">
                             <label for="remember" class="form-check-label">Remember Me</label>
                         </div>
-
+    
                         <button type="submit" class="btn btn-primary">Login</button>
-
-                        <div class="auth-links">
+    
+                        <div class="auth-links mt-3">
                             <p>Don't have an account? <a href="{{ route('register') }}">Register here</a></p>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+    
+        <!-- jQuery AJAX Script -->
+        <script>
+            $(document).ready(function () {
+                $("#loginForm").on("submit", function (e) {
+                    e.preventDefault(); // Prevent form from refreshing page
+    
+                    let formData = $(this).serialize();
+    
+                    $.ajax({
+                        url: "{{ route('login.post') }}",
+                        type: "POST",
+                        data: formData,
+                        dataType: "json",
+                        success: function (response) {
+                            $("#alert-message").html('<div class="alert alert-success">' + response.message + '</div>');
+                            $("#email-error").text('');
+                            $("#password-error").text('');
+    
+                            // Redirect if login is successful
+                            if (response.redirect) {
+                                setTimeout(() => {
+                                    window.location.href = response.redirect;
+                                }, 1500);
+                            }
+                        },
+                        error: function (xhr) {
+                            let errors = xhr.responseJSON.errors;
+    
+                            // Clear previous error messages
+                            $("#email-error").text('');
+                            $("#password-error").text('');
+                            $("#alert-message").html('');
+    
+                            if (errors) {
+                                if (errors.email) {
+                                    $("#email-error").text(errors.email[0]);
+                                }
+                                if (errors.password) {
+                                    $("#password-error").text(errors.password[0]);
+                                }
+                            } else {
+                                $("#alert-message").html('<div class="alert alert-danger">Invalid credentials.</div>');
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+    
     </body>
-
     </html>
-@endsection
+    

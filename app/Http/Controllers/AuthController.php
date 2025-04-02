@@ -14,47 +14,42 @@ use App\Mail\WelcomeMail;
 class AuthController extends Controller
 {
     // USER AUTHENTICATION METHODS
-    
+
     public function index()
     {
         $user = Auth::user();
         return view('welcome', compact('user'));
     }
-    
+
     public function login()
     {
         return view('auth.login');
     }
-    
+
     public function loginPost(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            "email" => "required|email",
-            "password" => "required",
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6'
         ]);
-        
-        if ($validator->passes()) {
-            $credentials = $request->only('email', 'password');
-            
-            if (Auth::attempt($credentials)) {
-                return redirect()->route('welcome');
-            }
-            
-            return redirect()->route('login')
-                ->withInput($request->except('password'))
-                ->withErrors(['email' => 'These credentials do not match our records.']);
-        } else {
-            return redirect()->route('login')
-                ->withInput($request->except('password'))
-                ->withErrors($validator);
+
+        if (Auth::attempt($request->only('email', 'password'), $request->has('remember'))) {
+            return response()->json([
+                'message' => 'Login successful!',
+                'redirect' => route('welcome') // Redirect to dashboard/homepage after login
+            ], 200);
         }
+
+        return response()->json([
+            'message' => 'Invalid credentials. Please try again.'
+        ], 401);
     }
-    
+
     public function register()
     {
         return view("auth.register");
     }
-    
+
     public function registerPost(Request $request)
     {
         $request->validate([
@@ -74,7 +69,7 @@ class AuthController extends Controller
 
         return redirect()->route('login')->with('success', 'Registration successful! Check your email.');
     }
-    
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -82,61 +77,67 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect()->route('welcome');
     }
-    
+
     public function profile()
     {
         $user = Auth::user();
-        
+
         if (!$user) {
             return redirect()->route('login')->with('error', 'You must be logged in.');
         }
-        
+
         return view('profile', compact('user'));
     }
-    
+
     // ADMIN AUTHENTICATION METHODS
-    
+
     public function adminlogin()
     {
         return view('admin.adminlogin');
     }
-    
+
     public function adminloginPost(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "email" => "required|email",
-            "password" => "required",
+            "password" => "required|min:6",
         ]);
-    
-        if ($validator->passes()) {
-            $credentials = ['email' => $request->email, 'password' => $request->password];
 
-            if (Auth::guard('admin')->attempt($credentials)) {
-                return redirect()->route('admin.dashboard');
-            }
-            
-            return redirect()->route('admin.adminlogin')
-                ->withInput($request->except('password'))
-                ->withErrors(['email' => 'These credentials do not match our records.']);
-        } else {
-            return redirect()->route('admin.adminlogin')
-                ->withInput($request->except('password'))
-                ->withErrors($validator);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
         }
+
+        $credentials = ['email' => $request->email, 'password' => $request->password];
+
+        if (Auth::guard('admin')->attempt($credentials, $request->has('remember'))) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful! Redirecting...',
+                'redirect' => route('admin.dashboard'),
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid credentials. Please try again.',
+        ], 401);
     }
-    
+
     public function dashboard()
     {
         $users = User::all();
         return view('admin.dashboard', compact('users'));
     }
-    
+
     public function editUser($id)
     {
         $user = User::findOrFail($id);
         return view('admin.edit-user', compact('user'));
     }
-    
+
     public function updateUser(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -146,18 +147,23 @@ class AuthController extends Controller
         ]);
         return redirect()->route('admin.dashboard')->with('success', 'User updated successfully.');
     }
-    
+
     public function deleteUser($id)
     {
         User::findOrFail($id)->delete();
         return redirect()->route('admin.dashboard')->with('success', 'User deleted successfully.');
     }
-    
+
     public function adminlogout(Request $request)
     {
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('admin.adminlogin');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logged out successfully.',
+            'redirect' => route('admin.adminlogin')
+        ], 200);
     }
 }
