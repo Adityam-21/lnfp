@@ -20,8 +20,8 @@ class UserController extends Controller
         return Excel::download(new UsersExport($startDate, $endDate), 'users.xlsx');
     }
 
-    public function import(Request $request)
-    {
+    public function userImport(Request $request)
+    { 
         $request->validate([
             'file' => 'required|mimes:xlsx,csv'
         ]);

@@ -39,15 +39,15 @@
 
     <div class="container mt-4">
         <h2 class="mb-4">User Management</h2>
-
-        <div class="mb-3">
-            <a href="{{ route('users.export') }}" class="btn btn-success">Export Users</a>
-            <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="d-inline">
-                @csrf
-                <input type="file" name="file" required>
-                <button type="submit" class="btn btn-primary">Import Users</button>
-            </form>
-        </div>
+        
+      <div class="mb-3">
+    <a href="{{ route('users.export') }}" class="btn btn-success">Export Users</a>
+    <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="d-inline">
+        @csrf
+        <input type="file" name="file" required>
+        <button type="submit" class="btn btn-primary">Import Users</button>
+    </form>
+</div>
 
         <!-- Export Users Based on Date Range -->
         <div class="mb-3">
@@ -115,44 +115,26 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            flatpickr("#start_date", {
-                dateFormat: "Y-m-d",
-                allowInput: false,
-                enableTime: false,
-                showMonths: 1,
-                disableMobile: true,
-                static: true,
-                onMonthChange: function(selectedDates, dateStr, instance) {
-                    instance.set('minDate', new Date(instance.currentYear, instance.currentMonth, 1));
-                    instance.set('maxDate', new Date(instance.currentYear, instance.currentMonth + 1,
-                        0));
-                },
-                onOpen: function(selectedDates, dateStr, instance) {
-                    instance.set('minDate', new Date(instance.currentYear, instance.currentMonth, 1));
-                    instance.set('maxDate', new Date(instance.currentYear, instance.currentMonth + 1,
-                        0));
-                }
-            });
+    flatpickr("#start_date", {
+        dateFormat: "Y-m-d",
+        allowInput: false,
+        enableTime: false,
+        showMonths: 1,
+        disableMobile: true,
+        static: true,
+        maxDate: "today"
+    });
 
-            flatpickr("#end_date", {
-                dateFormat: "Y-m-d",
-                allowInput: false,
-                enableTime: false,
-                showMonths: 1,
-                disableMobile: true,
-                static: true,
-                onMonthChange: function(selectedDates, dateStr, instance) {
-                    instance.set('minDate', new Date(instance.currentYear, instance.currentMonth, 1));
-                    instance.set('maxDate', new Date(instance.currentYear, instance.currentMonth + 1,
-                        0));
-                },
-                onOpen: function(selectedDates, dateStr, instance) {
-                    instance.set('minDate', new Date(instance.currentYear, instance.currentMonth, 1));
-                    instance.set('maxDate', new Date(instance.currentYear, instance.currentMonth + 1,
-                        0));
-                }
-            });
-        });
+    flatpickr("#end_date", {
+        dateFormat: "Y-m-d",
+        allowInput: false,
+        enableTime: false,
+        showMonths: 1,
+        disableMobile: true,
+        static: true,
+        maxDate: "today"
+    });
+});
     </script>
 </body>
 

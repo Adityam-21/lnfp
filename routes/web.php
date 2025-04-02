@@ -6,16 +6,20 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Mail\WelcomeMail;
 use App\Models\User;
+use App\Http\Controllers\UserImportController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+// Show Import Form
+Route::get('/users/import', [UserImportController::class, 'showImportForm'])->name('users.import.form');
 
+// Handle File Upload
+Route::post('/users/import', [UserImportController::class, 'import'])->name('users.import');
 
 Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
 Route::get('/users/export/filtered', [UserController::class, 'exportFiltered'])->name('users.export.filtered');
-Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
 
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
@@ -41,7 +45,7 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-// ✅ Test Mail Route
+// Test Mail Route
 Route::get('/test-mail', function () {
     $user = User::first();
     if (!$user) {
