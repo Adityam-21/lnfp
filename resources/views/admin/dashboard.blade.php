@@ -11,46 +11,58 @@
     <!-- Include Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <style>
+        body {
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(47, 4, 71, 0.5);
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(91, 6, 93, 0.85);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .table {
+            background: white;
+        }
+
+        .white-text {
+            color: white !important;
+        }
+
+        .pagination .page-link {
+            background-color: transparent;
+            color: white;
+            border-color: white;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: white;
+            color: black;
+            border-color: white;
+        }
+    </style>
 </head>
 
 <body>
-    <head>
-        <style>
-            body {
-                background: url('background.jpg') no-repeat center center fixed; 
-                background-size: cover;
-                position: relative;
-            }
-    
-            /* Add an overlay for better readability */
-            .overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(47, 4, 71, 0.5); /* Adjust opacity as needed */
-                z-index: -1;
-            }
-    
-            .container {
-                position: relative;
-                z-index: 1;
-                background: rgba(91, 6, 93, 0.85); /* Light background for contrast */
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            }
-    
-            .table {
-                background: white;
-            }
-        </style>
-    </head>
-    
-    <body>
-        <div class="overlay"></div>
-    
+    <div class="overlay"></div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ route('admin.dashboard') }}">Admin Panel</a>
@@ -75,33 +87,32 @@
     </nav>
 
     <div class="container mt-4">
-        <h2 class="mb-4">User Management</h2>
-        
+        <h2 class="mb-4 white-text">User Management</h2>
+
         <div class="mb-3 d-flex align-items-center gap-2">
             <a href="{{ route('users.export') }}" class="btn btn-success">Export Users</a>
-        
-            <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+
+            <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data"
+                class="d-flex align-items-center gap-2">
                 @csrf
                 <input type="file" name="file" class="form-control" required>
                 <button type="submit" class="btn btn-primary">Import Users</button>
             </form>
         </div>
-        
-        <!-- Export Users Based on Date Range -->
+
         <div class="mb-3">
-            <h4>Export Users Based on Date Range</h4>
-            <form action="{{ route('users.export.filtered') }}" method="GET" class="d-flex gap-2 align-items-center">
-                <label for="start_date" class="fw-bold">From:</label>
+            <h4 class="white-text">Export Users Based on Date Range</h4>
+            <form action="{{ route('users.export.filtered') }}" method="GET"
+                class="d-flex gap-2 align-items-center">
+                <label for="start_date" class="fw-bold white-text">From:</label>
                 <input type="text" id="start_date" name="start_date" class="form-control" required>
-        
-                <label for="end_date" class="fw-bold">To:</label>
+
+                <label for="end_date" class="fw-bold white-text">To:</label>
                 <input type="text" id="end_date" name="end_date" class="form-control" required>
-        
+
                 <button type="submit" class="btn btn-success">Export Filtered Users</button>
             </form>
         </div>
-        
-
 
         <table class="table table-bordered">
             <thead class="table-dark">
@@ -134,6 +145,10 @@
                 @endforeach
             </tbody>
         </table>
+
+        <div class="d-flex justify-content-center white-text">
+            {{ $users->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 
     <script>
@@ -153,27 +168,27 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-    flatpickr("#start_date", {
-        dateFormat: "Y-m-d",
-        allowInput: false,
-        enableTime: false,
-        showMonths: 1,
-        disableMobile: true,
-        static: true,
-        maxDate: "today"
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#start_date", {
+                dateFormat: "Y-m-d",
+                allowInput: false,
+                enableTime: false,
+                showMonths: 1,
+                disableMobile: true,
+                static: true,
+                maxDate: "today"
+            });
 
-    flatpickr("#end_date", {
-        dateFormat: "Y-m-d",
-        allowInput: false,
-        enableTime: false,
-        showMonths: 1,
-        disableMobile: true,
-        static: true,
-        maxDate: "today"
-    });
-});
+            flatpickr("#end_date", {
+                dateFormat: "Y-m-d",
+                allowInput: false,
+                enableTime: false,
+                showMonths: 1,
+                disableMobile: true,
+                static: true,
+                maxDate: "today"
+            });
+        });
     </script>
 </body>
 

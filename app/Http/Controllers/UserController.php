@@ -12,16 +12,23 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
+    // ✅ NEW: Show paginated users on dashboard
+    public function index()
+    {
+        $users = User::paginate(10); // Paginate users, 10 per page
+        return view('admin.dashboard', compact('users'));
+    }
+
     public function export()
     {
-        $startDate = null; // Default to exporting all users
+        $startDate = null;
         $endDate = null;
-        
+
         return Excel::download(new UsersExport($startDate, $endDate), 'users.xlsx');
     }
 
     public function userImport(Request $request)
-    { 
+    {
         $request->validate([
             'file' => 'required|mimes:xlsx,csv'
         ]);

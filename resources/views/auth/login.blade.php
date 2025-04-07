@@ -450,15 +450,16 @@
 
     <!DOCTYPE html>
     <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login</title>
-    
+
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
         <style>
             .invalid-feedback {
                 display: block;
@@ -467,6 +468,7 @@
             }
         </style>
     </head>
+
     <body>
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid">
@@ -487,38 +489,40 @@
                 </div>
             </div>
         </nav>
-    
+
         <div class="container mt-5">
             <div class="login-card card">
                 <div class="card-header">
                     <h2>Welcome Back</h2>
                     <p>Sign in to your account to continue</p>
                 </div>
-    
+
                 <div id="alert-message"></div> <!-- Dynamic Alert Message -->
-    
+
                 <div class="card-body">
                     <form id="loginForm">
                         @csrf
                         <div class="form-group">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            <input type="email" id="email" name="email" class="form-control"
+                                placeholder="Enter your email" required>
                             <p id="email-error" class="invalid-feedback"></p>
                         </div>
-    
+
                         <div class="form-group">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" class="form-control"
+                                placeholder="Enter your password" required>
                             <p id="password-error" class="invalid-feedback"></p>
                         </div>
-    
+
                         <div class="form-check">
                             <input type="checkbox" id="remember" name="remember" class="form-check-input">
                             <label for="remember" class="form-check-label">Remember Me</label>
                         </div>
-    
+
                         <button type="submit" class="btn btn-primary">Login</button>
-    
+
                         <div class="auth-links mt-3">
                             <p>Don't have an account? <a href="{{ route('register') }}">Register here</a></p>
                         </div>
@@ -526,56 +530,92 @@
                 </div>
             </div>
         </div>
-    
+
         <!-- jQuery AJAX Script -->
+        <!-- jQuery (Required) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <!-- jQuery Validation Plugin (Correct CDN) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+
+
         <script>
-            $(document).ready(function () {
-                $("#loginForm").on("submit", function (e) {
-                    e.preventDefault(); // Prevent form from refreshing page
-    
-                    let formData = $(this).serialize();
-    
-                    $.ajax({
-                        url: "{{ route('login.post') }}",
-                        type: "POST",
-                        data: formData,
-                        dataType: "json",
-                        success: function (response) {
-                            $("#alert-message").html('<div class="alert alert-success">' + response.message + '</div>');
-                            $("#email-error").text('');
-                            $("#password-error").text('');
-    
-                            // Redirect if login is successful
-                            if (response.redirect) {
-                                setTimeout(() => {
-                                    window.location.href = response.redirect;
-                                }, 1500);
-                            }
+            $(document).ready(function() {
+                $("#loginForm").validate({
+                    rules: {
+                        email: {
+                            required: true,
+                            email: true
                         },
-                        error: function (xhr) {
-                            let errors = xhr.responseJSON.errors;
-    
-                            // Clear previous error messages
-                            $("#email-error").text('');
-                            $("#password-error").text('');
-                            $("#alert-message").html('');
-    
-                            if (errors) {
-                                if (errors.email) {
-                                    $("#email-error").text(errors.email[0]);
-                                }
-                                if (errors.password) {
-                                    $("#password-error").text(errors.password[0]);
-                                }
-                            } else {
-                                $("#alert-message").html('<div class="alert alert-danger">Invalid credentials.</div>');
-                            }
+                        password: {
+                            required: true,
+                            minlength: 6
                         }
-                    });
+                    },
+                    messages: {
+                        email: {
+                            required: "Email is required",
+                            email: "Enter a valid email address"
+                        },
+                        password: {
+                            required: "Password is required",
+                            minlength: "Password must be at least 6 characters"
+                        }
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass("text-danger").appendTo(element.parent());
+                    },
+                    submitHandler: function(form) {
+                        let formData = $(form).serialize();
+
+                        $.ajax({
+                            url: "http://127.0.0.1:8080/authenticate", // Ensure correct route
+                            type: "POST",
+                            data: formData,
+                            dataType: "json",
+                            success: function(response) {
+                                $("#alert-message").html(
+                                    '<div class="alert alert-success">' +
+                                    $('<div>').text(response.message).html() +
+                                    '</div>'
+                                );
+
+                                $("#email-error").text('');
+                                $("#password-error").text('');
+
+                                if (response.redirect) {
+                                    setTimeout(() => {
+                                        window.location.href = response.redirect;
+                                    }, 1500);
+                                }
+                            },
+                            error: function(xhr) {
+                                $("#email-error").text('');
+                                $("#password-error").text('');
+                                $("#alert-message").html('');
+
+                                let errors = xhr.responseJSON ? xhr.responseJSON.errors : null;
+                                let message = xhr.responseJSON ? xhr.responseJSON.message :
+                                    "Invalid credentials. Please try again.";
+
+                                if (errors) {
+                                    if (errors.email) {
+                                        $("#email-error").text(errors.email[0]).addClass(
+                                            "text-danger");
+                                    }
+                                    if (errors.password) {
+                                        $("#password-error").text(errors.password[0]).addClass(
+                                            "text-danger");
+                                    }
+                                } else {
+                                    $("#alert-message").html(
+                                        '<div class="alert alert-danger">' + message +
+                                        '</div>'
+                                    );
+                                }
+                            }
+                        });
+                    }
                 });
             });
         </script>
-    
-    </body>
-    </html>
-    

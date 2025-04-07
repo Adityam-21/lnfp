@@ -36,7 +36,7 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->has('remember'))) {
             return response()->json([
                 'message' => 'Login successful!',
-                'redirect' => route('welcome') // Redirect to dashboard/homepage after login
+                'redirect' => route('welcome')
             ], 200);
         }
 
@@ -89,6 +89,18 @@ class AuthController extends Controller
         return view('profile', compact('user'));
     }
 
+    // FORM VALIDATION METHOD
+    public function submitForm(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        return response()->json(['message' => 'Form submitted successfully!']);
+    }
+
     // ADMIN AUTHENTICATION METHODS
 
     public function adminlogin()
@@ -128,7 +140,7 @@ class AuthController extends Controller
 
     public function dashboard()
     {
-        $users = User::all();
+        $users = User::paginate(10); // ✅ Enables use of $users->links()
         return view('admin.dashboard', compact('users'));
     }
 

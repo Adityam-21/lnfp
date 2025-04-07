@@ -444,6 +444,20 @@
         }
     </style>
 </head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery & jQuery Validate -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+
+    <style>
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
 
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -463,68 +477,136 @@
         </div>
     </nav>
 
-    <div class="container">
-        <div class="login-card">
-            <div class="card-header">
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header text-center">
                 <h2>Register</h2>
                 <p>Create your account for L&F Bootcamp</p>
             </div>
-
             <div class="card-body">
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
+                <!-- Success Message -->
+                <div id="success-message" class="alert alert-success d-none"></div>
+
+                <!-- Registration Form -->
+                <form id="registerForm">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name">
+                        <small class="error" id="name-error"></small>
                     </div>
-                @endif
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email">
+                        <small class="error" id="email-error"></small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password">
+                        <small class="error" id="password-error"></small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password">
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="terms" name="terms">
+                        <label class="form-check-label" for="terms">
+                            I agree to the Terms of Service and Privacy Policy
+                        </label>
+                        <small class="error" id="terms-error"></small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                </form>
+
+                <p class="mt-3 text-center">Already have an account? <a href="{{ route('login') }}">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery Validation & AJAX Script -->
+    <script>
+        $(document).ready(function() {
+            $("#registerForm").validate({
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 3
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6
+                    },
+                    password_confirmation: {
+                        required: true,
+                        equalTo: "#password"
+                    },
+                    terms: {
+                        required: true
+                    }
+                },
+                messages: {
+                    name: {
+                        required: "Full name is required",
+                        minlength: "Name must be at least 3 characters"
+                    },
+                    email: {
+                        required: "Email is required",
+                        email: "Enter a valid email address"
+                    },
+                    password: {
+                        required: "Password is required",
+                        minlength: "Password must be at least 6 characters"
+                    },
+                    password_confirmation: {
+                        required: "Confirm your password",
+                        equalTo: "Passwords do not match"
+                    },
+                    terms: {
+                        required: "You must agree to the terms"
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    $("#" + element.attr("id") + "-error").html(error);
+                },
+                submitHandler: function(form) {
+                    let formData = $("#registerForm").serialize();
+
+                    $.ajax({
+                        url: "{{ route('register.post') }}",
+                        type: "POST",
+                        data: formData,
+                        dataType: "json",
+                        beforeSend: function() {
+                            $("small.error").text('');
+                            $("#success-message").addClass('d-none').text('');
+                        },
+                        success: function(response) {
+                            $("#success-message").removeClass('d-none').text(response.message);
+                            $("#registerForm")[0].reset();
+                        },
+                        error: function(xhr) {
+                            let errors = xhr.responseJSON ? xhr.responseJSON.errors : null;
+                            if (errors) {
+                                $.each(errors, function(key, value) {
+                                    $("#" + key + "-error").text(value[0]);
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
 </body>
-
-</html>
-<form method="POST" action="{{ route('register.post') }}">
-    @csrf
-    <div class="form-group">
-        <label for="name" class="form-label">Full Name</label>
-        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name"
-            required>
-        @error('name')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-
-    <div class="form-group">
-        <label for="email" class="form-label">Email Address</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email"
-            required>
-            @error('email')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-        <small class="form-text">We'll never share your email with anyone else.</small>
-    </div>
-
-    <div class="form-group">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password"
-            required>
-            @error('password')
-            <small class="text-danger">{{ $message }}</small>
-        @enderror
-    </div>
-
-    <div class="form-group">
-        <label for="password_confirmation" class="form-label">Confirm Password</label>
-        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
-            placeholder="Confirm your password" required>
-    </div>
-
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
-        <label class="form-check-label" for="terms">
-            I agree to the Terms of Service and Privacy Policy
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create Account</button>
-</form>
-<p>Already have an account? <a href="{{ route('login') }}">Login</a></p>
-</body>
-
 </html>
