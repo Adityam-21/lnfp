@@ -8,8 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\WelcomeMail;
+use App\Events\UserRegistered; // ✅ Added
 
 class AuthController extends Controller
 {
@@ -64,8 +63,7 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        // Send Welcome Email
-        Mail::to($user->email)->send(new WelcomeMail($user));
+        event(new UserRegistered($user)); // 🟢 Triggers the listener to send email
 
         return redirect()->route('login')->with('success', 'Registration successful! Check your email.');
     }

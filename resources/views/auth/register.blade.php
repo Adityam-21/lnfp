@@ -531,7 +531,7 @@
 
     <!-- jQuery Validation & AJAX Script -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("#registerForm").validate({
                 rules: {
                     name: {
@@ -561,52 +561,42 @@
                     },
                     email: {
                         required: "Email is required",
-                        email: "Enter a valid email address"
+                        email: "Please enter a valid email address"
                     },
                     password: {
                         required: "Password is required",
                         minlength: "Password must be at least 6 characters"
                     },
                     password_confirmation: {
-                        required: "Confirm your password",
+                        required: "Please confirm your password",
                         equalTo: "Passwords do not match"
                     },
                     terms: {
                         required: "You must agree to the terms"
                     }
                 },
-                errorPlacement: function(error, element) {
-                    $("#" + element.attr("id") + "-error").html(error);
+                errorPlacement: function (error, element) {
+                    const id = element.attr("id") + "-error";
+                    $("#" + id).html(error);
                 },
-                submitHandler: function(form) {
-                    let formData = $("#registerForm").serialize();
-
-                    $.ajax({
-                        url: "{{ route('register.post') }}",
-                        type: "POST",
-                        data: formData,
-                        dataType: "json",
-                        beforeSend: function() {
-                            $("small.error").text('');
-                            $("#success-message").addClass('d-none').text('');
-                        },
-                        success: function(response) {
-                            $("#success-message").removeClass('d-none').text(response.message);
-                            $("#registerForm")[0].reset();
-                        },
-                        error: function(xhr) {
-                            let errors = xhr.responseJSON ? xhr.responseJSON.errors : null;
-                            if (errors) {
-                                $.each(errors, function(key, value) {
-                                    $("#" + key + "-error").text(value[0]);
-                                });
-                            }
-                        }
-                    });
+                success: function (label, element) {
+                    const id = $(element).attr("id") + "-error";
+                    $("#" + id).html("");
+                },
+                submitHandler: function (form) {
+                    $("#success-message")
+                        .removeClass("d-none")
+                        .text("Registration successful!");
+                    form.reset();
+                    setTimeout(() => {
+                        $("#success-message").addClass("d-none");
+                    }, 5000);
+                    return false;
                 }
             });
         });
     </script>
+    
 
 </body>
 </html>
